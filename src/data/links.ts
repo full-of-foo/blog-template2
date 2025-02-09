@@ -1,6 +1,6 @@
 import TwitterIcon from '@/components/icons/TwitterIcon'
 import GithubIcon from '@/components/icons/GithubIcon'
-import LinkedInIcon from '@/components/icons/LinkedInIcon'
+import LinkedInIcon from '@/components/icons/LinkedinIcon'
 
 // ADD YOUR SOCIAL NETWORKS HERE
 export const SOCIALNETWORKS = [
