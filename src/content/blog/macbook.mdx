@@ -1,190 +1,231 @@
 ---
-title: 'MacBook'
-description: 'The new MacBook Pro 2022 is here. With the Apple M2 chip, a new design, and more, the new MacBook Pro is the best laptop Apple has ever made.'
-pubDate: 'Jul 02 2022'
-heroImage: '../../assets/images/book.jpg'
-category: 'Category 4'
-tags: ['PC']
+heroImage: /src/assets/images/bc.jpg
+category: Code
+description: From scratch we are going develop a TODO list API with Sinatra
+pubDate: 2015-05-12T23:00:00.000Z
+tags:
+  - Ruby
+title: Baby's First Sinatra App
 ---
 
-**If you know HTML, you already know enough to write your first Astro component.**
+## Down to Bizness
 
-Astro component syntax is a superset of HTML. The syntax was [designed to feel familiar to anyone with experience writing HTML or JSX](#differences-between-astro-and-jsx), and adds support for including components and JavaScript expressions.
+Lets start off by creating something difficult. An application that is incredibly useful, original, cutting-edge and technically challenging to develop. What else could it be but a **TODO list** of course.
 
-## JSX-like Expressions
+From scratch we are going develop a TODO list API with [Sinatra](http://www.sinatrarb.com/). If you are unfamiliar with Sinatra it is simply a small web framework for Ruby, somewhat like Ruby on Rails. As Sinatra is built on top of [Rack](http://rack.github.io/) we can then easily deploy our completed app to [Heroku](https://www.heroku.com/).
 
-You can define local JavaScript variables inside of the frontmatter component script between the two code fences (`---`) of an Astro component. You can then inject these variables into the component's HTML template using JSX-like expressions!
+This tutorial expects that you have some grounding in Ruby and understand basic [RESTful API](http://www.ibm.com/developerworks/library/ws-restful/) design. We will be using Ruby 2.1.2 but any Ruby version post-2.0 should be fine.
 
-:::note[dynamic vs reactive]
-Using this approach, you can include **dynamic** values that are calculated in the frontmatter. But once included, these values are not **reactive** and will never change. Astro components are templates that only run once, during the rendering step.
+## Setting up your dependencies
 
-See below for more examples of [differences between Astro and JSX](#differences-between-astro-and-jsx).
-:::
+Even in a small project nobody likes managing their own dependencies, it really can be terrible so lets reach for [Bundler](http://bundler.io/), which essentially frees you from dependency hell by making sure your application runs the same code on every machine.
 
-### Variables
+First we need to install the Bundler gem.
 
-Local variables can be added into the HTML using the curly braces syntax:
-
-```astro
----
-const name = 'Astro'
----
-
-<div>
-	<h1>Hello {name}!</h1>
-	<!-- Outputs <h1>Hello Astro!</h1> -->
-</div>
+```bash
+$ gem install bundler
 ```
 
-### Dynamic Attributes
+We then must define our according [Gemfile](http://bundler.io/man/gemfile.5.html), a Ruby file placed at the root of your directory for describing your gem (package) dependencies.
 
-Local variables can be used in curly braces to pass attribute values to both HTML elements and components:
+```ruby
+source 'https://rubygems.org'
+# ruby '2.1.2' # tested with 2.1.2 but other versions should be fine
 
-```astro title="src/components/DynamicAttributes.astro" "{name}" "${name}"
----
-const name = 'Astro'
----
+gem 'sinatra', '1.4.2' # web framework
+gem 'sinatra-contrib', '1.4.2' # web framework extensions
 
-<h1 class={name}>Attribute expressions are supported</h1>
+gem 'data_mapper' # lightweight ORM
 
-<MyComponent templateLiteralNameAttribute={`MyNameIs${name}`} />
+group :development do
+  gem 'dm-sqlite-adapter' # local DB ORM adapter
+  gem 'sqlite3' # local DB
+end
+
+group :production do
+ gem 'pg' # prod DB
+ gem 'dm-postgres-adapter' # prod DB ORM adapter
+ gem 'unicorn' # prod application server
+end
 ```
 
-:::caution
-HTML attributes will be converted to strings, so it is not possible to pass functions and objects to HTML elements.
-For example, you can't assign an event handler to an HTML element in an Astro component:
+Finally we must install our required gems with Bundler.
 
-```astro
----
-// dont-do-this.astro
-function handleClick() {
-	console.log('button clicked!')
-}
----
-
-<!-- ❌ This doesn't work! ❌ -->
-<button onClick={handleClick}>Nothing will happen when you click me!</button>
+```bash
+$ bundle install --without production
 ```
 
-Instead, use a client-side script to add the event handler, like you would in vanilla JavaScript:
+## Say Harro World!
 
-```astro
----
-// do-this-instead.astro
----
+Great, we have our dependencies in place so we better verify that everything is working as expected. Any Ruby file which requires or loads the Sinatra library, with at least one endpoint defined, can be conveniently executed as a [WEBrick](http://en.wikipedia.org/wiki/WEBrick) server.
 
-<button id='button'>Click Me</button>
-<script>
-	function handleClick() {
-		console.log('button clicked!')
-	}
-	document.getElementById('button').addEventListener('click', handleClick)
-</script>
+Lets simply define one route or endpoint and test it out.
+
+```ruby
+require 'sinatra'
+
+get '/' do
+  "LOLOLOL! You rock!"
+end
 ```
 
-:::
+Like any other Ruby script, we can execute it with the `ruby` command.
 
-### Dynamic HTML
-
-Local variables can be used in JSX-like functions to produce dynamically-generated HTML elements:
-
-```astro title="src/components/DynamicHtml.astro" "{item}"
----
-const items = ['Dog', 'Cat', 'Platypus']
----
-
-<ul>
-	{items.map((item) => <li>{item}</li>)}
-</ul>
+```bash
+$ ruby proof.rb
 ```
 
-Astro can conditionally display HTML using JSX logical operators and ternary expressions.
+As you would expect `proof.rb` begins to run on a default port and we see the desired response on [http://localhost:4567/.](http://localhost:4567) Among other things, we can easily change this target port number by passing a flag argument to the script.
 
-```astro title="src/components/ConditionalHtml.astro" "visible"
----
-const visible = true
----
+A list of the available flags can be outputted by passing `-h` as an argument.
 
-{visible && <p>Show me!</p>}
+## App Environment Cruft
 
-{visible ? <p>Show me!</p> : <p>Else show me!</p>}
+Lets now create our cleverly named main application file, `app.rb`. We need to then first require our library modules.
+
+```ruby
+# Require the bundler gem and then call Bundler.require to load in all gems
+# listed in Gemfile.
+require 'bundler'
+Bundler.require(:default, :development) if defined?(Bundler)
+# Reload app.js when changed
+require "sinatra/reloader" if development?
 ```
 
-### Dynamic Tags
+Using `Bundler.require` we tell Bundler to load those modules in the gem groups named development and default, where the latter is all of those gems not contained in the development or production groups.
 
-You can also use dynamic tags by setting a variable to an HTML tag name or a component import:
+Remember our dependency [sinatra-contrib](http://www.sinatrarb.com/contrib)? It just contains lots of nice extensions for Sinatra. One of which no one should live without is [Sinatra::Reloader](http://www.sinatrarb.com/contrib/reloader.html). It automatically reloads all files required by your application which of course we need during development.
 
-```astro title="src/components/DynamicTags.astro" /Element|(?<!My)Component/
----
-import MyComponent from './MyComponent.astro'
-const Element = 'div'
-const Component = MyComponent
----
+## Models, Models Everywhere
 
-<Element>Hello!</Element>
-<!-- renders as <div>Hello!</div> -->
-<Component />
-<!-- renders as <MyComponent /> -->
+We are using [DataMapper](http://datamapper.org/why.html) as our ORM. In terms of our requirements its main appeal is the ever useful `auto_migrate!` feature which creates your datastore schema based off your defined `DataMapper::Resource` models, removing the need to write and manage migrations.
+
+Now we must create our local [SQLite](https://www.sqlite.org/) DB and establish a connection.
+
+```ruby
+# DB init
+DataMapper.setup(:default, "sqlite3://#{Dir.pwd}/development.db") if development?
 ```
 
-When using dynamic tags:
+With such in place we can now define our naive `Task` which models a TODO list item. Similar to [ActiveRecord](http://guides.rubyonrails.org/active_record_basics.html), in DataMapper the convention with model names is to use the singular version of the name. Though unlike ActiveRecord, DataMapper does not enforce this.
 
-- **Variable names must be capitalized.** For example, use `Element`, not `element`. Otherwise, Astro will try to render your variable name as a literal HTML tag.
+```ruby
+# Models
+class Task
+  include DataMapper::Resource
 
-- **Hydration directives are not supported.** When using [`client:*` hydration directives](/en/core-concepts/framework-components/#hydrating-interactive-components), Astro needs to know which components to bundle for production, and the dynamic tag pattern prevents this from working.
-
-### Fragments
-
-Astro supports using either `<Fragment> </Fragment>` or the shorthand `<> </>`.
-
-Fragments can be useful to avoid wrapper elements when adding [`set:*` directives](/en/reference/directives-reference/#sethtml), as in the following example:
-
-```astro title="src/components/SetHtml.astro" "Fragment"
----
-const htmlString = '<p>Raw HTML content</p>'
----
-
-<Fragment set:html={htmlString} />
+  property :id, Serial, key: true
+  property :name, String, required: true
+  property :completed_at, DateTime
+  property :created_at, DateTime
+end
+# Finalize and migrate
+DataMapper.finalize.auto_upgrade!
 ```
 
-### Differences between Astro and JSX
+Before using our model we must first `finalize`. This checks the validity of all of our DataMapper model definitions and initializes all properties associated with relationships. This nicely returns its caller, `DataMapper`, so we can chain a call to `auto_upgrade!` which issues the necessary CREATE statement for our task table if it does not already exist.
 
-Astro component syntax is a superset of HTML. It was designed to feel familiar to anyone with HTML or JSX experience, but there are a couple of key differences between `.astro` files and JSX.
+Now lets verify that our model is in fact persistent and working as expected. We can simply execute script and our DB will be in place. Lets query the current amount of task rows.
 
-#### Attributes
-
-In Astro, you use the standard `kebab-case` format for all HTML attributes instead of the `camelCase` used in JSX. This even works for `class`, which is not supported by React.
-
-```jsx del={1} ins={2} title="example.astro"
-<div className="box" dataValue="3" />
-<div class="box" data-value="3" />
+```bash
+$ ruby -r ./app.rb -e "puts Task.all.size"
 ```
 
-#### Multiple Elements
+## Gimme Them Endpoints
 
-An Astro component template can render multiple elements with no need to wrap everything in a single `<div>` or `<>`, unlike JavaScript or JSX.
+In Sinatra we can define endpoints that are a combination of a HTTP verb and the according request path. Which as you can see results in succinct and pretty code ♥
 
-```astro title="src/components/RootElements.astro"
----
-// Template with multiple elements
----
+```ruby
+# Api
+get '/task/' do
+  content_type :json
 
-<p>No need to wrap elements in a single containing element.</p>
-<p>Astro supports multiple root elements in a template.</p>
+  @tasks = Task.all(order: :created_at.desc)
+  @tasks.to_json
+end
 ```
 
-#### Comments
+Upon a defined endpoint being accessed, a `before` code block is ran if defined. This is a simple before-request hook, we do not avail of it for our endpoints. Upon its successful termination, the user-defined block on that endpoint will be executed.
 
-In Astro, you can use standard HTML comments or JavaScript-style comments.
+Above we simply return a JSON list of all the task rows. We can verify this endpoint by simply executing `curl http://localhost:4567/task/`. As expected the body of our response is an empty array.
 
-```astro title="example.astro"
----
+Now we can define our remaining endpoints for POST, GET,PUT and DELETE.
 
----
+```ruby
+post '/task/' do
+  content_type :json
 
-<!-- HTML comment syntax is valid in .astro files -->{/* JS comment syntax is also valid */}
+  @task = Task.new(permit_params)
+  @task.save ? @task.to_json : halt(500)
+end
+
+put '/task/:id' do
+  content_type :json
+
+  @task = Task.get(params[:id].to_i)
+  @task.update(permit_params)
+
+  @task && @task.save ? @task.to_json : halt(500)
+end
+
+get '/task/:id' do
+  content_type :json
+
+  @task = Task.get(params[:id].to_i)
+  @task ? @task.to_json : halt(404)
+end
+
+delete '/task/:id' do
+  content_type :json
+
+  @task = Task.get(params[:id].to_i)
+  @task && @task.destroy ? { success: "ok" }.to_json : halt(400)
+end
+
+def permit_params
+  params.select { |k, v| ["name", "completed_at"].include? k }
+end
 ```
 
-:::caution
-HTML-style comments will be included in browser DOM, while JS ones will be skipped. To leave TODO messages or other development-only explanations, you may wish to use JavaScript-style comments instead.
-:::
+## Data, Not Enough Data
+
+Before we deploy to Heroku it would be nice to have a prepopulated API in place, so lets just seed two tasks.
+
+```ruby
+# Seed
+if Task.count == 0
+  Task.create(name: "Test Task One")
+  Task.create(name: "Test Task Two")
+end
+```
+
+Again, we can verify this by executing `curl http://localhost:4567/task/` and see our listed tasks.
+
+## Ship First, Test Later
+
+Lets put this thing of beauty out there! The usual tweaks are required for our Heroku deploy. We need to parameterize what gems are required and what DataMapper connection we wish to use per environment.
+
+```ruby
+Bundler.require(:default, ENV['RACK_ENV'] || :development) if defined?(Bundler)
+
+if development?
+  DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/development.db")
+elsif production?
+  DataMapper.setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/sinatra-todos')
+end
+```
+
+We then need to create a [rakeup file](https://devcenter.heroku.com/articles/rack) named `config.ru` to instruct Heroku how to run our Rack app.
+
+```ruby
+require './app'
+run Sinatra::Application
+```
+
+Finally, we must setup a repository, add a [Heroku remote](https://devcenter.heroku.com/articles/git) and push our work to deploy the app.
+
+```bash
+git init && git add --all && git commit -m "initial"
+heroku create
+git push heroku master
+```
