@@ -1,0 +1,81 @@
+---
+heroImage: /src/assets/images/neo2.jpg
+category: Code
+description: Parallel algorithm design fundamentals - Matrix Multiplication
+pubDate: 2016-12-07T00:00:00.000Z
+tags:
+  - 'parallelism '
+  - c++
+  - 'algorithms '
+  - java
+title: 'Matrix Multiply: Naive Vs Cache-Aware Approaches (Part 1)'
+---
+
+## Why, Why, Why?
+
+Before undertaking my postgraduate studies I led a quite joyous and sheltered life. Living the high life in the worlds of Ruby, Javascript, Python, Java and all of those sorts. My life got flipped-turned upside down when I began studying subjects like Secure Programming, Concurrent Programming and Formal Methods. For me, the biggest take-aways from these learnings were [parallel algorithm design](http://en.wikipedia.org/wiki/Parallel_algorithm) and the [principle of locality](http://en.wikipedia.org/wiki/Locality_of_reference).
+
+Most dense linear algebraic computations rely on the consideration of both spatial and temporal locality. If you are unfamiliar with locality, the former describes the tendency of applications to reference memory addresses that are near other recently accessed addresses and the latter describes the amount of reuse of the same memory locations.
+
+One such linear algebra problem subject to this is dense [Matrix-Matrix multiplication (MMM)](http://en.wikipedia.org/wiki/Matrix_multiplication). Coincidentally MMM is also highly highly parallelisable so it is a perfect to demonstrate [parallel algorithm design](http://en.wikipedia.org/wiki/Parallel_algorithm) and the [principle of locality](http://en.wikipedia.org/wiki/Locality_of_reference).
+
+## Matrix Multiply, Ain’t Nobody Got Time For That
+
+Matrix multiplication is important, it is actually central to many scientific computations. For instance, solving a linear system or least-square fits of coefficients to data rely on MMM implementations for good performance.
+
+As you would expect, the performance of an MMM implementation is intimately related to the memory layout of the arrays. On modern shared-memory multiprocessors with multi-level memory hierarchies, naive access patterns in the memory hierarchy can incur cache capacity misses.
+
+## Matrix Multiply, How Tho?
+
+MMM for square matrices has the following mathematical definition (which is independent of any implementation). Given two n x n matrices A and B, the sum and product
+
+C + A ·B
+
+For non-square matrices MMM differs in that the amount of columns in matrix A must equal equal the amount of rows in B.
+
+## Naive Matrix-Matrix Multiply
+
+The most naive algorithm for MMM comes straight from the above definition and mimics computing the product by hand. Assuming the arrays are stored such that rows of the arrays are in consecutive memory locations, i.e. row-major order, then we derive C as follows
+
+```java
+for (int i = 0; i < rowAmount1; i++)
+    for (int j = 0; j < colAmount1; j++)
+        for (int k = 0; k < rowAmount2; k++)
+            C[i][j] += (A[i][k] ∗ B[k][j]);
+```
+
+This algorithm is said to be naive because it suffers from poor locality. Elements of B are accessed column-wise, and therefore not in sequential order in memory. While each iteration in j reuses row i of A, that row may have been evicted from the cache by the time the inner-most loop completes. As a result, the algorithm is bandwidth limited and displays poor performance and low efficiency.
+
+As we highlighted before, matrix multiplications have abundant parallel computation. While maintaining the less favourable design of this naive approach, let us introduce a parallelised implementation
+
+```java
+executor = Executors.newFixedThreadPool(10) ;
+for (interval = numTasks, end = rowAmount1,
+        size = (int) Math.ceil(rowAmount1 ∗ 1.0 / 10);
+        interval > 0 && end > 0; interval−−, end −= size){
+    final int to = end;
+    final int from = Math.max(0, end − size);
+    Runnable runnable = new Runnable(){
+        @Override
+        public void run(){
+            for (i = from; i < to; i++)
+                for (j = 0; j < colAmount1; j++)
+                    for (k = 0; k < rowAmount2; k++)
+                        C[i][j] += (A[i][k] ∗ B[k][j]);
+        }
+    };
+    executor.execute(runnable);
+}
+```
+
+We must manually divide the work up into tasks and provide each task with its from/to bounds. Each task will run the entire outer loop but for only specific non-overlapping values. Thus there is no synchronisation in this implementation as no mutable data is shared across threads. The input arrays A and B are not mutated. While the contents of output array C are altered, each thread works on different slices.
+
+## What’s The Actual Damage Tho?
+
+When working with most matrix sizes this approach sees significant improvements in execution time against its sequential counterpart. However as you may expect these improvements are not linear against different matrix sizes.
+
+The basic flaw of the naive triple-for-loop implementation is that the size of its per-loop working set prevents bandwidth amplification from the closest levels of the memory hierarchy, i.e. even with this parallelised horizontal-slicing approach the algorithm **still suffers from poor locality**.
+
+## Until Next Time
+
+Later on we shall investigate some fun stuff like Cache-Awareness and the Tall-Cache Assumption. Of course we’ll then develop a cache-aware MMM algorithm using a “tiling” approach. Finally we will see some pretty benchmark graphs that demonstrate how our algorithms fared across different matrix sizes over a different number of cores.

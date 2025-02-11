@@ -1,0 +1,293 @@
+---
+heroImage: /src/assets/images/test.jpeg
+category: Code
+description: 'Mutation Testing is Awesome: PIT for the JVM'
+pubDate: 2018-01-18T00:00:00.000Z
+tags:
+  - testing
+  - jvm
+  - java
+title: 'Mutation Testing is Awesome: PIT for the JVM'
+---
+
+Nowadays its not all that popular to be a testing enthusiast or fanatic.
+
+After all, [real developers ship](http://removingalldoubt.com/post/2006/09/19/Fatherly-Advice-To-New-Programmers.aspx) and [TDD is dead](http://david.heinemeierhansson.com/2014/tdd-is-dead-long-live-testing.html), so developers ought to spend less time getting caught up in testing-related hogwash and instead focus on the immediate churning out of what is at hand. Be [10x](https://thenewstack.io/10x-programmer-just-jerk/), [move fast and break things](https://xkcd.com/1428/), pew pew pew, and so on, and so on.
+
+Free time from shipping our way to [software unicorn](<https://en.wikipedia.org/wiki/Unicorn_(finance)>) land is often spent perusing blog posts from high-culture [engineering forums](https://news.ycombinator.com). In doing so you may have stumbled upon this strange blog, and, much too your dismay we’ll be getting into plenty of 1x testing nonsense. _Sarcasm_ aside, here we’re going to explore and demonstrate some things like [Mutation Testing](https://en.wikipedia.org/wiki/Mutation_testing), [Code Coverage](http://mcminn.io/publications/j18.pdf) and [Subsumption](http://patricklam.ca/stqam/2010/notes/pdf/L3.pdf).
+
+The hope is to possibly convince you that (in general) code coverage is useful, and moreover, that mutation coverage testing is both awesome and practical.
+
+\- Buckle up buckaroos.
+
+## Back to Basics, Yo
+
+Remember, you might want to begin rolling your eyes when you hear the terms “complete testing”, “exhaustive testing”, and “full coverage”. They are each poorly defined due to a theoretical limitation of software - the number of potential inputs for most programs is so large that they are effectively infinite.
+
+Consider `javac`. As a software artifact its potential inputs include not only every Java program, but all strings. Its only limitation is the size of the file that can be read by the parser. Therefore, the number of inputs is effectively infinite and cannot be explicitly enumerated. It can never have “full coverage”.
+
+Enter formal [coverage criteria](http://mcminn.io/publications/j18.pdf). As it is not feasible to generate all test inputs, coverage criteria can be used to decide our inputs. The supposition here is that coverage criteria will more effectively reveal faults (over using `n` arbitrary inputs). Albeit expensive, the most obvious way to use criteria is to directly generate test case values to satisfy the criterion `C`.
+
+However, in practice we generally manually create an arbitrary amount of pseudo-random inputs, and then measure the tests against the criterion in terms of their coverage. On the surface this understandable. Generating tests to directly satisfy a criterion is hard, really hard. This particularly true when attempting generate test paths for [graph coverage criteria](http://swtv.kaist.ac.kr/courses/cs453-fall09/graph_coverage.pdf).
+
+Not all is lost though. More flexible criteria do exist which, more importantly, can actually be used sustainably against real programs.
+
+## Kanye test Grammar?
+
+The most common coverage criteria generate tests to satisfy their criterion based on either graphs, logical expressions, or partitions of input space. Graph and logical models are built from software artifacts (such as source code, design descriptions and specifications). Similarly, a model of the inputs can be built based on some description of an input space. Test criteria can then be applied to these models. ![kanye](/images/kanye.png)
+
+Another major method of deriving coverage criteria is though the syntactic descriptions of software artifacts. Under syntax-based testing, the syntax of the software artifact is used as the criteria model and tests are created from the syntax (ie. covering or violating the syntax in some way). So simply, by virtue a grammar describes what a test input _is not_. We say that an input is valid if it is _in the language_ specified by the grammar, and invalid otherwise.
+
+Thus, it is often useful to produce invalid strings from a grammar. It is also helpful in testing to use strings that are valid but that follow a different derivation from a pre-existing string. This general use of grammar in testing is known as mutation analysis, and it can be applied most types of software artifacts.
+
+Albeit this all quite theoretical feeling thus far, mutation analysis has paved the way for what is currently argued to be the [gold standard](http://crestweb.cs.ucl.ac.uk/resources/mutation_testing_repository/search_paper.php?func=2&pid=OffuttMK04) in software testing; [Program-based Mutation Testing](https://en.wikipedia.org/wiki/Mutation_testing).
+
+## Mutant Ninja Testing
+
+Although mutation testing sounds somewhat highbrow, its conceptually quite simple. Faults, or _mutations_, are injected into one’s testing target, and when those tests are ran there are total and per case mutation adequacy scores derived. Under most systems, given those tests have failed then the mutation is _killed_ and if they have passed then the mutation has _survived_. In turn, this total percentage of mutations killed acts as a testing criterion for test case quality.
+
+So, unlike traditional test coverage criteria that only measure which code is executed by your tests, mutation testing actually measures the ability of your tests in revealing faults. This premise of mutation testing is intuitively appealing; we can discover the input data that can be used to reveal real faults. Nevertheless, as highlighted earlier, it is not possible for any system to generate every possible permutation of mutant in a candidate program.
+
+Consequently, mutation testing systems will only offer a finite set of injectable mutators. So, hopeful that these finite amount mutators will reveal faults, mutation testing can be said to rely on two assumptions: the [Competent Programmer Hypothesis (CPH) and Coupling Effect](https://edisciplinas.usp.br/pluginfile.php/1943431/mod_resource/content/1/Hints_on_Test_Data_Selection-Demillo.pdf).
+
+The CPH asserts that a program produced by a competent programmer is close to the final correct version of a program. Thus, it is assumed that the source faults introduced by a competent programmer are relatively simple and can be corrected by small syntactical changes. Accordingly, in mutation testing only simple syntactical mutations are generally used. Contrarily, the Coupling Effect brings the suggestion that tests capable of catching first order mutations will also detect higher order mutations that contain these first order mutations.
+
+## Strong and Weak Mutations
+
+The implementation of mutation testing systems are generally characterised in terms of their adopted mutation generation techniques. Another distinction can be made with respect to how a given tool analyses how mutants are killed during the execution process. Such techniques can be classified as employing strong or weak mutation. Under strong mutation given program _p_, a mutant _m_ of program _p_ is said to be killed only if mutant _m_ gives a different output from the original program _p_.
+
+In contrast, weak mutation requires only that the value produced at the point we introduce _m_ is different from the corresponding value in _p_ for _m_ to be killed. This more optimal approach is adopted by tools such as [PIT](http://pitest.org); instead of analysing each mutant after the execution of the entire run, mutants are checked immediately after their respective execution point.
+
+## Killing Mutants with PIT: (╯°□°)–︻╦╤─ - - -
+
+[PIT](http://pitest.org) is an [open-source](https://github.com/hcoles/pitest) mutation testing framework for Java and the JVM. Formerly being named Parallel Isolated Test, the project’s initial function was to isolate static state through running JUnit tests in parallel using separate classloaders, however the author later found that this turned out to be a much less interesting problem than mutation testing which initially needed a lot of the same plumbing.
+
+Most importantly, as far as mutation testing projects go, PIT is [commercially popular](http://pitest.org/sky_experience/) and [actively contributed to](https://github.com/hcoles/pitest/releases). As you would expect, it too has first-class support for the things like JUnit4, TestNg, Ant and Maven. Third-party support does also exist for Gradle, Eclipse and InteliJ integrations.
+
+In terms of design, mutation testing systems generally derive adequacy scores in four phases: mutant generation, test selection, mutant insertion and mutant detection. PIT parallelises these phases, making a mutation coverage run feel almost like a traditional statement coverage run. Most testing frameworks in this space have adopted varying strategies in implementing each of these phases. One reason for this disparity could be that many JVM-based mutation testing systems have been written to meet the needs of academic research.
+
+PIT is currently positioned as being the most performant mutation testing tool today, primarily due to fact that it adopts an effective byte code based approach in the mutant detection and generation phases. Generally systems will adopt either a source code or byte based approach at these stages. Using byte code during the mutation detection phase is quite computationally expensive, though this can be offset by an effective test selection phase.
+
+Additionally, systems using source code at the generation stage can also incur a large computational cost if a naive approach is followed. Tools like [MuJava](https://cs.gmu.edu/~offutt/mujava/), [Javalanche](https://github.com/david-schuler/javalanche) and [Jumble](http://jumble.sourceforge.net/) too use byte code generation, however PIT performs various other optimisations. Rather than blindly running all cases against one mutation PIT will first determine overall line coverage and subsequently run only those cases that can actually reach the mutation.
+
+## The Super Complicated Test Candidate
+
+Most tech blogs love using real-world code examples, so lets not be an exception to that rule. Here we define a program that allows one [classify a triangle](http://russcon.org/triangle_classification.html) shape based on three supplied coordinates. A classification can be either equilateral, isosceles, scalene or invalid. Accordingly we implement a `TriangleType` enum and following we define our `Triangle` class with one static method for classification.
+
+```java
+public enum TriangleType {
+  INVALID, SCALENE, EQUILATERAL, ISOSCELES
+}
+```
+
+```java
+public class Triangle {
+  public static TriangleType classify(final int a, final int b, final int c) {
+    int trian;
+    if ((a <= 0) || (b <= 0) || (c <= 0)) {
+      return TriangleType.INVALID;
+    }
+    trian = 0;
+    if (a == b) {
+      trian = trian + 1;
+    }
+    if (a == c) {
+      trian = trian + 2;
+    }
+    if (b == c) {
+      trian = trian + 3;
+    }
+    if (trian == 0) {
+      if (((a + b) < c) || ((a + c) < b) || ((b + c) < a)) {
+        return TriangleType.INVALID;
+      } else {
+        return TriangleType.SCALENE;
+      }
+    }
+    if (trian > 3) {
+      return TriangleType.EQUILATERAL;
+    }
+    if ((trian == 1) && ((a + b) > c)) {
+      return TriangleType.ISOSCELES;
+    } else if ((trian == 2) && ((a + c) > b)) {
+      return TriangleType.ISOSCELES;
+    } else if ((trian == 3) && ((b + c) > a)) {
+      return TriangleType.ISOSCELES;
+    }
+    return TriangleType.INVALID;
+  }
+}
+```
+
+We also implement a `TriangleTest` case, and because we’re good testers we ensure to meet total line coverage:
+
+```java
+public class TriangleTest {
+  @Test
+  public void test1() {
+    final TriangleType type = Triangle.classify(1, 2, 3);
+    assertEquals(SCALENE, type);
+  }
+  @Test
+  public void testInvalid1() {
+    final TriangleType type = Triangle.classify(1, 2, 4);
+    assertEquals(INVALID, type);
+  }
+  @Test
+  public void testInvalid2() {
+    final TriangleType type = Triangle.classify(1, 4, 2);
+    assertEquals(INVALID, type);
+  }
+  @Test
+  public void testInvalid3() {
+    final TriangleType type = Triangle.classify(4, 1, 2);
+    assertEquals(INVALID, type);
+  }
+  @Test
+  public void testInvalidNeg1() {
+    final TriangleType type = Triangle.classify(-1, 1, 1);
+    assertEquals(INVALID, type);
+  }
+  @Test
+  public void testInvalidNeg2() {
+    final TriangleType type = Triangle.classify(1, -1, 1);
+    assertEquals(INVALID, type);
+  }
+  @Test
+  public void testInvalidNeg3() {
+    final TriangleType type = Triangle.classify(1, 1, -1);
+    assertEquals(INVALID, type);
+  }
+  @Test
+  public void testEquiliteral() {
+    final TriangleType type = Triangle.classify(1, 1, 1);
+    assertEquals(EQUILATERAL, type);
+  }
+  @Test
+  public void testIsoceles1() {
+    final TriangleType type = Triangle.classify(2, 2, 3);
+    assertEquals(ISOSCELES, type);
+  }
+  @Test
+  public void testIsoceles2() {
+    final TriangleType type = Triangle.classify(2, 3, 2);
+    assertEquals(ISOSCELES, type);
+  }
+  @Test
+  public void testIsoceles3() {
+    final TriangleType type = Triangle.classify(3, 2, 2);
+    assertEquals(ISOSCELES, type);
+  }
+  @Test
+  public void testInvalid() {
+    final TriangleType type = Triangle.classify(3, 1, 1);
+    assertEquals(INVALID, type);
+  }
+}
+```
+
+So now lets gets webscale and get our candidate unit tested and mutation tested under Maven. The `pitest` artifact and its related dependencies are hosted by Sonatype so we can add the typical [`oss-sonatype`](https://github.com/full-of-foo/pit-coverage-tool-review/blob/master/practical/maven-pit-review/pom.xml#L9) `repository` and `pluginRepository` entries to our `pom.xml`. We can then simply configure PIT under JUnit4 as follows:
+
+```xml
+...
+<dependencies>
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>2.4</version>
+        </plugin>
+        <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.1.10-SNAPSHOT</version>
+            <executions>
+                <execution>
+                    <id>verify</id>
+                    <phase>verify</phase>
+                    <goals>
+                        <goal>mutationCoverage</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+  ...
+```
+
+Unless we configure PIT to employ a [whitelist of mutation operations](https://github.com/full-of-foo/pit-coverage-tool-review/blob/master/practical/maven-pit-review/all-configs-pom.xml#L75), it will use a default of four default mutation operations. Of a possible sixteen operations these four are perhaps the most useful and least expensive:
+
+1. Negate Conditionals Mutator inverts all conditionals to their boundary counterpart.
+   - `boolean a = 1 == 2;` becomes mutated to `boolean a = 1 != 2;`
+2. Conditionals Boundary Mutator replaces relational operators with their boundary counterpart.
+   - `int a = 1 > 2;` becomes mutated to `int a = 1 <= 2;`
+3. Return Values Mutator mutates the return values of method calls.
+   - `return new Object();` becomes mutated to `new Object(); return null;`
+   - `return new Long(123);` becomes mutated to `return new Long(123)+1;`
+4. Math Mutator replaces binary arithmetic operations for either integer or floating-point arithmetic with another operation.
+   - `int a = 1 + 1` becomes mutated to `int a = 1 - 1`
+
+## Testing Tests While Testing
+
+Given our configuration, PIT will now perform mutation testing at end the of the Maven `verfiy` lifecycle phases (after `test`). This involves running both line coverage and mutation coverage testing:
+
+```bash
+> $ mvn verify
+            ....
+[INFO] Adding org.pitest:pitest to SUT classpath
+[INFO] Mutating from /usr/src/app/maven-pit-review/target/classes
+[INFO] Defaulting to group id (com.review.app*)
+PIT >> INFO : Sending 1 test classes to minion
+PIT >> INFO : Sent tests to minion
+PIT >> INFO : MINION : PIT >> INFO : Checking environment
+PIT >> INFO : MINION : PIT >> INFO : Found  12 tests
+PIT >> INFO : MINION : PIT >> INFO : Dependency analysis reduced number of potential tests by 0
+PIT >> INFO : MINION : PIT >> INFO : 12 tests received
+PIT >> INFO : Calculated coverage in 0 seconds.
+PIT >> INFO : Created  1 mutation test units
+PIT >> INFO : Completed in 3 seconds
+              ....
+================================================================================
+- Statistics
+================================================================================
+>> Generated 44 mutations Killed 36 (82%)
+>> Ran 115 tests (2.61 tests per mutation)
+================================================================================
+- Mutators
+================================================================================
+> org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator
+>> Generated 10 Killed 2 (20%)
+> KILLED 2 SURVIVED 8 TIMED_OUT 0 NON_VIABLE 0
+> MEMORY_ERROR 0 NOT_STARTED 0 STARTED 0 RUN_ERROR 0
+> NO_COVERAGE 0
+--------------------------------------------------------------------------------
+> org.pitest.mutationtest.engine.gregor.mutators.ReturnValsMutator
+>> Generated 8 Killed 8 (100%)
+> KILLED 8 SURVIVED 0 TIMED_OUT 0 NON_VIABLE 0
+> MEMORY_ERROR 0 NOT_STARTED 0 STARTED 0 RUN_ERROR 0
+> NO_COVERAGE 0
+--------------------------------------------------------------------------------
+> org.pitest.mutationtest.engine.gregor.mutators.MathMutator
+>> Generated 9 Killed 9 (100%)
+> KILLED 9 SURVIVED 0 TIMED_OUT 0 NON_VIABLE 0
+> MEMORY_ERROR 0 NOT_STARTED 0 STARTED 0 RUN_ERROR 0
+> NO_COVERAGE 0
+--------------------------------------------------------------------------------
+> org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator
+>> Generated 17 Killed 17 (100%)
+> KILLED 17 SURVIVED 0 TIMED_OUT 0 NON_VIABLE 0
+> MEMORY_ERROR 0 NOT_STARTED 0 STARTED 0 RUN_ERROR 0
+> NO_COVERAGE 0
+--------------------------------------------------------------------------------
+```
+
+So, who would of guessed, our “total covered” candidate app yields 44 mutations but eight survive. Resulting in a total mutation adequacy score of 82%. The default mutation operations are generated across our 12 test cases, resulting in the execution of 115 mutated test cases. So what is this tellings us about our tests? It means for each test run against a mutated version of the program all of the mutants can be reached (because we have full statement coverage). However, for eight of these runs at least the respective fault goes unnoticed as the tests pass.
