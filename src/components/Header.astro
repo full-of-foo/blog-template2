@@ -8,20 +8,26 @@ import { SOCIALNETWORKS } from '@/data/links'
 ---
 
 <header class='relative flex items-center h-12 font-semibold'>
-	<a class='text-lg mr-auto' href='/'>Tony Troy</a>
+	<a class='text-lg mr-auto' href='/'>
+		<span class='fancy-text pr-2'>Lightweight Development</span> 🔨🧑🏻‍💻
+	</a>
 
 	<div
 		id='astro-header-drawer'
-		class='shadow rounded-l-lg md:bg-transparent dark:md:bg-transparent bg-white dark:bg-[#0a0910] md:shadow-none md:rounded-none md:border-none md:h-auto md:static absolute transition-transform duration-300 ease-in translate-x-96 md:translate-x-0 top-12 -right-5 pl-4 pt-6 pb-4 md:p-0 h-[200px] w-[200px] z-50'
+		class='shadow rounded-l-lg md:bg-transparent dark:md:bg-transparent bg-white dark:bg-[#0a0910] md:shadow-none md:rounded-none md:border-none md:h-auto md:static absolute transition-transform duration-300 ease-in translate-x-96 md:translate-x-0 top-12 -right-5 pl-4 pt-5 pb-4 md:p-0 h-[250px] w-[200px] z-50'
 	>
 		<nav
 			class='flex h-full flex-col justify-between gap-12 text-left md:flex-row md:w-full md:gap-5'
 		>
-			<div
-				class='flex flex-col gap-4 md:flex-row md:border-r-2 border-black pr-4 dark:border-white'
-			>
-				<HeaderLink href='/tags' class='flex items-center gap-1 text-2xl md:text-base'>
-					<TagIcon /> Tags
+			<div class='flex flex-col gap-4 md:flex-row pr-3'>
+				<HeaderLink href='/posts' class='flex items-center gap-1 text-2xl md:text-base'>
+					Blog
+				</HeaderLink>
+			</div>
+
+			<div class='flex flex-col gap-4 md:flex-row pr-4'>
+				<HeaderLink href='/about' class='flex items-center gap-1 text-2xl md:text-base'>
+					About
 				</HeaderLink>
 			</div>
 
@@ -38,10 +44,6 @@ import { SOCIALNETWORKS } from '@/data/links'
 	</div>
 
 	<div class='flex items-center gap-3 md:pl-3' transition:persist='navbar'>
-		<div>
-			<Search />
-		</div>
-		<!-- <ToggleTheme /> -->
 		<button id='astro-header-drawer-button' type='button' class='md:ml-6 md:hidden'>
 			<MenuIcon />
 			<span class='sr-only'>Show Menu</span>
@@ -63,3 +65,33 @@ import { SOCIALNETWORKS } from '@/data/links'
 		}
 	})
 </script>
+<link rel='preconnect' href='https://fonts.googleapis.com' />
+<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
+<link
+	href='https://fonts.googleapis.com/css2?family=Jacquard+12&family=Ultra&display=swap'
+	rel='stylesheet'
+/>
+
+<style>
+	.fancy-text {
+		font-family: 'Ultra', serif;
+		font-weight: 400;
+		font-style: normal;
+		color: #4a5568; /* Tailwind's gray-700 */
+		/* background: linear-gradient(90deg, #a7a7a7, #0f0f0f);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent; */
+		/* text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); */
+		animation: fancy-animation 3s infinite;
+	}
+
+	@keyframes fancy-animation {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.1);
+		}
+	}
+</style>
