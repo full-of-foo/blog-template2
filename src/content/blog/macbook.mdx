@@ -69,19 +69,19 @@ get '/' do
 end
 ```
 
-Like any other Ruby script, we can execute it with the `ruby` command.
+Like any other Ruby script, we can execute it with the _ruby_ command.
 
 ```bash
 $ ruby proof.rb
 ```
 
-As you would expect `proof.rb` begins to run on a default port and we see the desired response on [http://localhost:4567/.](http://localhost:4567) Among other things, we can easily change this target port number by passing a flag argument to the script.
+As you would expect _proof.rb_ begins to run on a default port and we see the desired response on [http://localhost:4567/.](http://localhost:4567) Among other things, we can easily change this target port number by passing a flag argument to the script.
 
-A list of the available flags can be outputted by passing `-h` as an argument.
+A list of the available flags can be outputted by passing _-h_ as an argument.
 
 ## App Environment Cruft
 
-Lets now create our cleverly named main application file, `app.rb`. We need to then first require our library modules.
+Lets now create our cleverly named main application file, _app.rb_. We need to then first require our library modules.
 
 ```ruby
 # Require the bundler gem and then call Bundler.require to load in all gems
@@ -92,13 +92,13 @@ Bundler.require(:default, :development) if defined?(Bundler)
 require "sinatra/reloader" if development?
 ```
 
-Using `Bundler.require` we tell Bundler to load those modules in the gem groups named development and default, where the latter is all of those gems not contained in the development or production groups.
+Using _Bundler.require_ we tell Bundler to load those modules in the gem groups named development and default, where the latter is all of those gems not contained in the development or production groups.
 
 Remember our dependency [sinatra-contrib](http://www.sinatrarb.com/contrib)? It just contains lots of nice extensions for Sinatra. One of which no one should live without is [Sinatra::Reloader](http://www.sinatrarb.com/contrib/reloader.html). It automatically reloads all files required by your application which of course we need during development.
 
 ## Models, Models Everywhere
 
-We are using [DataMapper](http://datamapper.org/why.html) as our ORM. In terms of our requirements its main appeal is the ever useful `auto_migrate!` feature which creates your datastore schema based off your defined `DataMapper::Resource` models, removing the need to write and manage migrations.
+We are using [DataMapper](http://datamapper.org/why.html) as our ORM. In terms of our requirements its main appeal is the ever useful _auto_migrate!_ feature which creates your datastore schema based off your defined _DataMapper::Resource_ models, removing the need to write and manage migrations.
 
 Now we must create our local [SQLite](https://www.sqlite.org/) DB and establish a connection.
 
@@ -107,7 +107,7 @@ Now we must create our local [SQLite](https://www.sqlite.org/) DB and establish 
 DataMapper.setup(:default, "sqlite3://#{Dir.pwd}/development.db") if development?
 ```
 
-With such in place we can now define our naive `Task` which models a TODO list item. Similar to [ActiveRecord](http://guides.rubyonrails.org/active_record_basics.html), in DataMapper the convention with model names is to use the singular version of the name. Though unlike ActiveRecord, DataMapper does not enforce this.
+With such in place we can now define our naive _Task_ which models a TODO list item. Similar to [ActiveRecord](http://guides.rubyonrails.org/active_record_basics.html), in DataMapper the convention with model names is to use the singular version of the name. Though unlike ActiveRecord, DataMapper does not enforce this.
 
 ```ruby
 # Models
@@ -123,7 +123,7 @@ end
 DataMapper.finalize.auto_upgrade!
 ```
 
-Before using our model we must first `finalize`. This checks the validity of all of our DataMapper model definitions and initializes all properties associated with relationships. This nicely returns its caller, `DataMapper`, so we can chain a call to `auto_upgrade!` which issues the necessary CREATE statement for our task table if it does not already exist.
+Before using our model we must first _finalize_. This checks the validity of all of our DataMapper model definitions and initializes all properties associated with relationships. This nicely returns its caller, _DataMapper_, so we can chain a call to _auto_upgrade!_ which issues the necessary CREATE statement for our task table if it does not already exist.
 
 Now lets verify that our model is in fact persistent and working as expected. We can simply execute script and our DB will be in place. Lets query the current amount of task rows.
 
@@ -145,9 +145,9 @@ get '/task/' do
 end
 ```
 
-Upon a defined endpoint being accessed, a `before` code block is ran if defined. This is a simple before-request hook, we do not avail of it for our endpoints. Upon its successful termination, the user-defined block on that endpoint will be executed.
+Upon a defined endpoint being accessed, a _before_ code block is ran if defined. This is a simple before-request hook, we do not avail of it for our endpoints. Upon its successful termination, the user-defined block on that endpoint will be executed.
 
-Above we simply return a JSON list of all the task rows. We can verify this endpoint by simply executing `curl http://localhost:4567/task/`. As expected the body of our response is an empty array.
+Above we simply return a JSON list of all the task rows. We can verify this endpoint by simply executing _curl http\://localhost:4567/task/_. As expected the body of our response is an empty array.
 
 Now we can define our remaining endpoints for POST, GET,PUT and DELETE.
 
@@ -199,7 +199,7 @@ if Task.count == 0
 end
 ```
 
-Again, we can verify this by executing `curl http://localhost:4567/task/` and see our listed tasks.
+Again, we can verify this by executing _curl http\://localhost:4567/task/_ and see our listed tasks.
 
 ## Ship First, Test Later
 
@@ -215,7 +215,7 @@ elsif production?
 end
 ```
 
-We then need to create a [rakeup file](https://devcenter.heroku.com/articles/rack) named `config.ru` to instruct Heroku how to run our Rack app.
+We then need to create a [rakeup file](https://devcenter.heroku.com/articles/rack) named _config.ru_ to instruct Heroku how to run our Rack app.
 
 ```ruby
 require './app'

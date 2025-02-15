@@ -8,8 +8,7 @@
  ⭐ Leave a star if you like this project! ⭐️
 </h3>
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fdanielcgilibert%2Fblog-template)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/danielcgilibert/blog-template)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/full-of-foo/blog-template)
 
 </div>
 
@@ -28,13 +27,6 @@
 11. [FrontMatter](#-Frontmatter)
 12. [CLI](#-Commands)
 13. [Contributors](#-Contributors)
-
-## 💻 Demo
-
-Check out the [Demo](https://blog-template-gray.vercel.app/), hosted on Vercel
-<br/>
-
-https://github.com/danielcgilibert/blog-template/assets/44746462/56b8399e-cc5b-45a8-b9d2-d69833ecadb1
 
 ## 🦙 Tina CMS
 
@@ -82,14 +74,6 @@ The documentation for Tina CMS can be found [here](https://tina.io/docs/)
 - ✅ ViewTransition (new)
 - ✅ Disqus comments (new)
 
-## 🛣️ Roadmap
-
-- ❌ Add post author
-- ❌ Add customization with colors
-- ❌ Add filters for reading time, date...
-- ❌ More sharing options
-- ❌ Internationalization (i18n)
-
 ## ⚙️ Stack
 
 - [**ASTRO** + **Typescript**](https://astro.build/) - Astro is the all-in-one web framework designed for speed.
@@ -134,22 +118,6 @@ pnpm dev
   - robots.txt -> update the Sitemap url to your own domain
   - open-graph -> the open-graph is the image that will be displayed when sharing the blog link. For posts, the preview image is the post cover.
 - Edit the social networks in **src/data/links.ts**, change the URL to your social network.
-
-## 🗂️ Adding a category
-
-To add a new category to your blog, simply go to the src/data/categories.ts file and add it to the array.
-
-Example:
-
-```ts
-export  const  CATEGORIES  =  [
-'JavaScript',
-'React',
-'new category here'  <---
-]  as  const
-```
-
-> 🚨 Zod checks whether the category is not correctly written or does not exist in the properties of the markdown document. **It will throw an error when building the application.** 🚨
 
 ## 📄 Adding a post
 
@@ -205,9 +173,3 @@ All commands are run from the root of the project, from a terminal:
 | `pnpm run format`       | Format codes with Prettier                                                                                                       |
 | `pnpm run sync`         | Generates TypeScript types for all Astro modules. [Learn more](https://docs.astro.build/en/reference/cli-reference/#astro-sync). |
 | `pnpm run lint`         | Lint with ESLint                                                                                                                 |
-
-## 👋 Contributors
-
-<a href="https://github.com/danielcgilibert/blog-template/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=danielcgilibert/blog-template" />
-</a>

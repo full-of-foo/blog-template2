@@ -26,7 +26,7 @@ Remember, you might want to begin rolling your eyes when you hear the terms “c
 
 Consider `javac`. As a software artifact its potential inputs include not only every Java program, but all strings. Its only limitation is the size of the file that can be read by the parser. Therefore, the number of inputs is effectively infinite and cannot be explicitly enumerated. It can never have “full coverage”.
 
-Enter formal [coverage criteria](http://mcminn.io/publications/j18.pdf). As it is not feasible to generate all test inputs, coverage criteria can be used to decide our inputs. The supposition here is that coverage criteria will more effectively reveal faults (over using `n` arbitrary inputs). Albeit expensive, the most obvious way to use criteria is to directly generate test case values to satisfy the criterion `C`.
+Enter formal [coverage criteria](http://mcminn.io/publications/j18.pdf). As it is not feasible to generate all test inputs, coverage criteria can be used to decide our inputs. The supposition here is that coverage criteria will more effectively reveal faults (over using _n_ arbitrary inputs). Albeit expensive, the most obvious way to use criteria is to directly generate test case values to satisfy the criterion _C_.
 
 However, in practice we generally manually create an arbitrary amount of pseudo-random inputs, and then measure the tests against the criterion in terms of their coverage. On the surface this understandable. Generating tests to directly satisfy a criterion is hard, really hard. This particularly true when attempting generate test paths for [graph coverage criteria](http://swtv.kaist.ac.kr/courses/cs453-fall09/graph_coverage.pdf).
 
@@ -38,7 +38,7 @@ The most common coverage criteria generate tests to satisfy their criterion base
 
 Another major method of deriving coverage criteria is though the syntactic descriptions of software artifacts. Under syntax-based testing, the syntax of the software artifact is used as the criteria model and tests are created from the syntax (ie. covering or violating the syntax in some way). So simply, by virtue a grammar describes what a test input _is not_. We say that an input is valid if it is _in the language_ specified by the grammar, and invalid otherwise.
 
-Thus, it is often useful to produce invalid strings from a grammar. It is also helpful in testing to use strings that are valid but that follow a different derivation from a pre-existing string. This general use of grammar in testing is known as mutation analysis, and it can be applied most types of software artifacts.
+Thus, it is often useful to produce invalid strings from a grammar. It is also helpful in testing to use strings that are valid but that follow a different derivation from a pre-existing string. This general use of grammar in testing is known as mutation analysis, and it can be applied most types of software artefacts.
 
 Albeit this all quite theoretical feeling thus far, mutation analysis has paved the way for what is currently argued to be the [gold standard](http://crestweb.cs.ucl.ac.uk/resources/mutation_testing_repository/search_paper.php?func=2&pid=OffuttMK04) in software testing; [Program-based Mutation Testing](https://en.wikipedia.org/wiki/Mutation_testing).
 
@@ -72,7 +72,7 @@ Additionally, systems using source code at the generation stage can also incur a
 
 ## The Super Complicated Test Candidate
 
-Most tech blogs love using real-world code examples, so lets not be an exception to that rule. Here we define a program that allows one [classify a triangle](http://russcon.org/triangle_classification.html) shape based on three supplied coordinates. A classification can be either equilateral, isosceles, scalene or invalid. Accordingly we implement a `TriangleType` enum and following we define our `Triangle` class with one static method for classification.
+Most tech blogs love using real-world code examples, so lets not be an exception to that rule. Here we define a program that allows one [classify a triangle](http://russcon.org/triangle_classification.html) shape based on three supplied coordinates. A classification can be either equilateral, isosceles, scalene or invalid. Accordingly we implement a _TriangleType_ enum and following we define our _Triangle_ class with one static method for classification.
 
 ```java
 public enum TriangleType {
@@ -119,7 +119,7 @@ public class Triangle {
 }
 ```
 
-We also implement a `TriangleTest` case, and because we’re good testers we ensure to meet total line coverage:
+We also implement a _TriangleTest_ case, and because we’re good testers we ensure to meet total line coverage:
 
 ```java
 public class TriangleTest {
@@ -186,7 +186,7 @@ public class TriangleTest {
 }
 ```
 
-So now lets gets webscale and get our candidate unit tested and mutation tested under Maven. The `pitest` artifact and its related dependencies are hosted by Sonatype so we can add the typical [`oss-sonatype`](https://github.com/full-of-foo/pit-coverage-tool-review/blob/master/practical/maven-pit-review/pom.xml#L9) `repository` and `pluginRepository` entries to our `pom.xml`. We can then simply configure PIT under JUnit4 as follows:
+So now lets gets webscale and get our candidate unit tested and mutation tested under Maven. The _pitest_ artifact and its related dependencies are hosted by Sonatype so we can add the typical [`oss-sonatype`](https://github.com/full-of-foo/pit-coverage-tool-review/blob/master/practical/maven-pit-review/pom.xml#L9) _repository_ and _pluginRepository_ entries to our _pom.xml_. We can then simply configure PIT under JUnit4 as follows:
 
 ```xml
 ...
@@ -227,18 +227,18 @@ So now lets gets webscale and get our candidate unit tested and mutation tested 
 Unless we configure PIT to employ a [whitelist of mutation operations](https://github.com/full-of-foo/pit-coverage-tool-review/blob/master/practical/maven-pit-review/all-configs-pom.xml#L75), it will use a default of four default mutation operations. Of a possible sixteen operations these four are perhaps the most useful and least expensive:
 
 1. Negate Conditionals Mutator inverts all conditionals to their boundary counterpart.
-   - `boolean a = 1 == 2;` becomes mutated to `boolean a = 1 != 2;`
+   - _boolean a = 1 == 2;_ becomes mutated to _boolean a = 1 != 2;_
 2. Conditionals Boundary Mutator replaces relational operators with their boundary counterpart.
-   - `int a = 1 > 2;` becomes mutated to `int a = 1 <= 2;`
+   - _int a = 1 > 2;_ becomes mutated to _int a = 1 \<= 2;_
 3. Return Values Mutator mutates the return values of method calls.
-   - `return new Object();` becomes mutated to `new Object(); return null;`
-   - `return new Long(123);` becomes mutated to `return new Long(123)+1;`
+   - _return new Object();_ becomes mutated to _new Object(); return null;_
+   - _return new Long(123);_ becomes mutated to _return new Long(123)+1;_
 4. Math Mutator replaces binary arithmetic operations for either integer or floating-point arithmetic with another operation.
-   - `int a = 1 + 1` becomes mutated to `int a = 1 - 1`
+   - _int a = 1 + 1_ becomes mutated to _int a = 1 - 1_
 
 ## Testing Tests While Testing
 
-Given our configuration, PIT will now perform mutation testing at end the of the Maven `verfiy` lifecycle phases (after `test`). This involves running both line coverage and mutation coverage testing:
+Given our configuration, PIT will now perform mutation testing at end the of the Maven _verfiy_ lifecycle phases (after _test_). This involves running both line coverage and mutation coverage testing:
 
 ```bash
 > $ mvn verify
