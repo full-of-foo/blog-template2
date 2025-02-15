@@ -31,7 +31,7 @@ n > M/B
 
 Bellow we see the row-major layout of matrices **A** and **B**. We depict the red rectangles in matrix **B** as our blocks of cache. For all rows of matrix **A** we traverse over each column of **B**. Upon traversing **B** the accessing of each element is cached. Given that **n = colAmountOfA** and **n > M/B** then before the traversal of a column **B** completes the first, and possibly several subsequent, cached blocks of **B** will be evicted. So upon the next and remaining traversals of **B** we incur cache-misses on each block
 
-/images/naive.png
+![](/src/assets/images/naive.png)
 
 From this we can be quite clever and infer that a naive algorithm with **n > M/B** results gets the following work done
 
@@ -102,7 +102,7 @@ n > M/B
 
 Once we determine **s ≤ M/B** we can easily decompose submatrices (tiles) from matrix **B** that respect the target cache size
 
-/images/tiled.png
+![](/src/assets/images/tiled.png)
 
 As you would expect the tiling optimisation still results in **Θ(n3)** computations. With an optimal **s** value, **Θ(M½)**, we see an improvement in the amount of work done to that of our naive approach. The tall-cache assumption implies that each submatrix and its data will fit in cache, meaning only cold caches misses should occur per submatrix (**Θ(s2/B)**).
 
@@ -120,18 +120,16 @@ Our benchmarking goal was to analyse the trends displayed across the executions 
 2. To maintain measurement accuracy the elements held by **A** and **B** needed to be the same for each measurement. Every element held by **A** is always 2, while each element in **B** is always 3.
 3. Each benchmark was conducted on two machines (4 core and 8 cores) under the same conditions (no other user processes running, machines connected to power outlets, etc.)
 
-(/src/assets/images/i5.png)
-
-(/src/assets/images/i7.png)
+![](/src/assets/images/i5.png)![](/src/assets/images/i7.png)
 
 ## Dem Results
 
 Reflecting on the mean (μ) execution-time and according standard deviation (σ) provided by our benchmark runs, the collated results are as follows
 
-/images/res.png
+![](/src/assets/images/res.png)
 
 Our data poses several interesting avenues of investigation. However our main concern is exploring the benefits of cache-aware algorithms, so lets just explore the performance differences between both algorithms across runs. The bellow sidebar chart illustrates an obvious difference in our algorithms, at a glance one can see that there is large deviation between the naive and tiled time results.
 
-/images/data.png
+![](/src/assets/images/data.png)
 
 This is particularly true across the benchmarks where matrix dimensions are in their thousands. Such is unsurprising given that the naive algorithm is cache-oblivious. When viewing every sidebar related to the tiled results we can see that varying matrix dimensions do not greatly affect performance. Interestingly, we see that an increase in cores only greatly benefits the naive algorithm. It sees around a 55% improvement in execution-time with the assistance of 4 extra cores across all dimension sizes.

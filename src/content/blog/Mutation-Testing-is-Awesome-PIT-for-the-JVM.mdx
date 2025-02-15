@@ -34,9 +34,7 @@ Not all is lost though. More flexible criteria do exist which, more importantly,
 
 ## Kanye test Grammar?
 
-The most common coverage criteria generate tests to satisfy their criterion based on either graphs, logical expressions, or partitions of input space. Graph and logical models are built from software artifacts (such as source code, design descriptions and specifications). Similarly, a model of the inputs can be built based on some description of an input space. Test criteria can then be applied to these models. ![kanye](/images/kanye.png)
-
-Another major method of deriving coverage criteria is though the syntactic descriptions of software artifacts. Under syntax-based testing, the syntax of the software artifact is used as the criteria model and tests are created from the syntax (ie. covering or violating the syntax in some way). So simply, by virtue a grammar describes what a test input _is not_. We say that an input is valid if it is _in the language_ specified by the grammar, and invalid otherwise.
+The most common coverage criteria generate tests to satisfy their criterion based on either graphs, logical expressions, or partitions of input space. Graph and logical models are built from software artifacts (such as source code, design descriptions and specifications). Similarly, a model of the inputs can be built based on some description of an input space. Test criteria can then be applied to these models. ![](/src/assets/images/kanye.png)Another major method of deriving coverage criteria is though the syntactic descriptions of software artifacts. Under syntax-based testing, the syntax of the software artifact is used as the criteria model and tests are created from the syntax (ie. covering or violating the syntax in some way). So simply, by virtue a grammar describes what a test input _is not_. We say that an input is valid if it is _in the language_ specified by the grammar, and invalid otherwise.
 
 Thus, it is often useful to produce invalid strings from a grammar. It is also helpful in testing to use strings that are valid but that follow a different derivation from a pre-existing string. This general use of grammar in testing is known as mutation analysis, and it can be applied most types of software artefacts.
 
@@ -186,7 +184,7 @@ public class TriangleTest {
 }
 ```
 
-So now lets gets webscale and get our candidate unit tested and mutation tested under Maven. The _pitest_ artifact and its related dependencies are hosted by Sonatype so we can add the typical [`oss-sonatype`](https://github.com/full-of-foo/pit-coverage-tool-review/blob/master/practical/maven-pit-review/pom.xml#L9) _repository_ and _pluginRepository_ entries to our _pom.xml_. We can then simply configure PIT under JUnit4 as follows:
+So now lets gets webscale and get our candidate unit tested and mutation tested under Maven. The _pitest_ artifact and its related dependencies are hosted by Sonatype so we can add the typical _[oss-sonatype](https://github.com/full-of-foo/pit-coverage-tool-review/blob/master/practical/maven-pit-review/pom.xml#L9)_ _repository_ and _pluginRepository_ entries to our _pom.xml_. We can then simply configure PIT under JUnit4 as follows:
 
 ```xml
 ...
