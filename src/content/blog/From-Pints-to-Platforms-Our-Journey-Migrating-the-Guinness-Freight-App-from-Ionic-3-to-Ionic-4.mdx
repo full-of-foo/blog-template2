@@ -1,0 +1,139 @@
+---
+heroImage: /src/assets/images/g tank.jpg
+category: Code
+description: >-
+  At Optimise Logistics we recount our adventure of upgrading our hybrid mobile
+  app, designed to manage the global transportation of Guinness, from Ionic 3 to
+  Ionic 4
+pubDate: 2018-02-07T00:00:00.000Z
+tags:
+  - start-up
+  - javascript
+  - typescript
+  - ionic
+  - guiness
+title: 'Pints to Platforms: Our Journey Migrating the Guinness Freight App to Ionic 4'
+---
+
+Over my first here at Optimise Logistics, I've had the privilege of creating and scaling our hybrid iOS and Android mobile from over the last year. Today a lot transport companies face friction around their booking, tracking and invoicing needs. After our first few weeks and months of bring our platform to market we've quite humbled and thrilled to hear our customers feedback - they're very much enjoying being able to seamlessly transport their freight with our platform and mobile app. On both the product and technical side we've learned some very valuable lessons too, but more on that some other time.
+
+Its super exciting to that our mobile application is now assists trucking companies in Ireland manage the transportation of Guinness from the Emerald Isle to destinations worldwide! At this time our geolocation needs are simply not supported via Cordova plugins with Ionic 3, so we were thankful now have this impetus to migrate to Ionic 4. The opportunity here also meant gaining some quite helpful page load time improvements from Ionic's 4 render caching improvements. Little did we know, this journey would be akin to navigating a lorry through Dublin's narrow streets—challenging but rewarding.
+
+Project Structure Overhaul
+
+One of the first hurdles we encountered was the significant change in project structure. Ionic 4 adopted a setup more aligned with standard Angular projects, which meant our cozy, familiar file tree needed a makeover. In Ionic 3, our pages resided in the src/pages directory. With Ionic 4, the structure shifted to house everything within src/app. Here's a glimpse of the changes:
+
+```
+src/
+├── app/
+│   ├── app.component.ts
+│   └── app.module.ts
+├── pages/
+│   ├── home/
+│   │   ├── home.ts
+│   │   ├── home.html
+│   │   └── home.scss
+│   └── about/
+│       ├── about.ts
+│       ├── about.html
+│       └── about.scss
+└── assets/
+```
+
+Ionic 4 Structure:
+
+```
+src/
+├── app/
+│   ├── home/
+│   │   ├── home.page.ts
+│   │   ├── home.page.html
+│   │   └── home.page.scss
+│   ├── about/
+│   │   ├── about.page.ts
+│   │   ├── about.page.html
+│   │   └── about.page.scss
+│   ├── app.component.ts
+│   ├── app.module.ts
+│   └── app-routing.module.ts
+└── assets/
+```
+
+We've got a few dozen primary pages in our app thus far, so following this reorganisation things like extracting cross-page code, integrating parallel code branches and code reviews have become a little easier.
+
+Routing System Transition
+
+Next up was the navigation system. Ionic 3's NavController was like our old reliable GPS, but Ionic 4 introduced the Angular Router, a more sophisticated navigation system. Transitioning required us to rethink our routing approach. Previously, pushing and popping pages looked like this:
+
+```typescript
+import { NavController } from 'ionic-angular'
+import { AboutPage } from '../about/about'
+
+export class HomePage {
+	constructor(public navCtrl: NavController) {}
+
+	goToAbout() {
+		this.navCtrl.push(AboutPage)
+	}
+}
+```
+
+In Ionic 4, we embraced the Angular Router, defining routes in a dedicated module and navigating using the Router service:
+
+```typescript
+import { Router } from '@angular/router'
+
+export class HomePage {
+	constructor(private router: Router) {}
+
+	goToAbout() {
+		this.router.navigate(['/about'])
+	}
+}
+```
+
+Among other things, this helped us to remove some service code we wrote to dynamiclly return page-object routes.
+
+Styling and Shadow DOM
+
+Styling also saw changes, particularly with the introduction of Shadow DOM. In Ionic 3, global styles could inadvertently affect components, leading to unexpected side effects—like a spillage in the cargo hold. Ionic 4 encapsulated styles within components, reducing such risks. However, this meant some of our custom styles needed adjustments. For instance, targeting an ion-button required using CSS variables
+
+```scss
+// ionic 3
+Delete-button {
+	background-color: red;
+}
+
+// ionic 4
+Delete-button {
+	--background: red;
+}
+```
+
+This supported our styling to be respected as intended, without any unintended global overrides (which is something that had bitten us in the past once or twice).
+
+Lifecycle Hooks Adjustments
+
+Lifecycle hooks also underwent changes. In Ionic 3, we used [hooks](https://ionicframework.com/docs/updating/4-0) like ionViewDidLoad to perform actions when a page loaded
+
+```typescript
+export class HomePage {
+	ionViewDidLoad() {
+		console.log('HomePage loaded')
+	}
+}
+```
+
+Ionic 4 encouraged the use of Angular's lifecycle [hooks](https://www.hkinfosoft.com/blog/migrating-from-ionic-3-0-to-ionic-4-0/), such as ngOnInit
+
+```typescript
+export class HomePage implements OnInit {
+	ngOnInit() {
+		console.log('HomePage initialized')
+	}
+}
+```
+
+\
+Further Reflection Post-Migration\
+It was a journey filled with learning curves and the occasional roadblock. However, the improvements in performance and maintainability made it a worthwhile endeavour for sure—and importantly, we enjoyed some well-earned pints of Guinness after releasing to the app stores!
