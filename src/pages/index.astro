@@ -12,7 +12,7 @@ const MAX_POSTS = 1000 // max number of posts to show on the home page
 const posts = await getPosts(MAX_POSTS)
 ---
 
-<BaseLayout title='(╯°□°）╯︵ ┻━┻ Anthony Troy | useless tech ramblings'>
+<BaseLayout title='Tony Troy | useless tech ramblings'>
 	<!-- <div id="home" class="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
     <main class="space-y-8 text-center">
         <section>
@@ -26,7 +26,7 @@ const posts = await getPosts(MAX_POSTS)
         </section>
     </main>
 </div> -->
-	<HeaderLink href='/tags' class='flex flex items-center gap-1 text-2xl'>
+	<HeaderLink href='/tags' class='flex flex items-center gap-1'>
 		<TagIcon /> tags
 	</HeaderLink>
 	<ListPosts FirstBig={false} posts={posts} />
